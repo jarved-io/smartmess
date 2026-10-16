@@ -47,6 +47,19 @@ async function signIn(role, id, pw) {
   assert.equal($('app').style.display, 'block', 'login error: ' + $('lerr').textContent);
 }
 
+test('login shows readable text even when a proxy answers with an object-shaped error (never [object Object])', async () => {
+  const real = dom.window.fetch;
+  dom.window.fetch = () => Promise.resolve({ ok: false, status: 502, json: () => Promise.resolve({ error: { code: 'BAD_GATEWAY', message: 'upstream down' } }) });
+  dom.window.setRole('student'); $('uid').value = 'NN25CSE290'; $('pw').value = 'whatever1'; dom.window.doLogin();
+  await wait(() => $('lerr').textContent);
+  assert.equal($('lerr').textContent, 'upstream down');
+  dom.window.fetch = () => Promise.resolve({ ok: false, status: 500, json: () => Promise.reject(new Error('not json')) });
+  $('lerr').textContent = ''; dom.window.doLogin();
+  await wait(() => $('lerr').textContent);
+  assert.match($('lerr').textContent, /HTTP 500/); assert.doesNotMatch($('lerr').textContent, /object/i);
+  dom.window.fetch = real; $('lerr').textContent = '';
+});
+
 test('login screen explains the demo database and rejects a wrong password with the server message', async () => {
   assert.match(text(), /Demo database: all data is SYNTHETIC/);
   dom.window.setRole('student'); $('uid').value = 'NN25CSE290'; $('pw').value = 'wrong-pass'; dom.window.doLogin();

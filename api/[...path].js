@@ -39,11 +39,15 @@ module.exports = async function handler(req, res) {
     if (useReal()) {
       try { await (await getDb()).query('SELECT 1'); database = 'connected'; } catch (e) { database = 'error'; }
     }
-    let dataSource = 'synthetic-demo-backend';
+    let dataSource = 'synthetic-demo-backend', schema, seeded;
     if (database === 'connected') {
-      try { const r = await (await getDb()).query(`SELECT value FROM settings WHERE mess_id IS NULL AND key='data_source'`); dataSource = r[0] ? r[0].value : 'real'; } catch (e) { dataSource = 'unknown'; }
+      const db = await getDb();
+      try { seeded = (await db.query('SELECT 1 FROM users LIMIT 1')).length > 0; schema = 'ready'; } catch (e) { schema = 'missing'; }
+      if (schema === 'ready') {
+        try { const r = await db.query(`SELECT value FROM settings WHERE mess_id IS NULL AND key='data_source'`); dataSource = r[0] ? r[0].value : 'real'; } catch (e) { dataSource = 'unknown'; }
+      } else dataSource = 'unknown';
     }
-    return json(res, database === 'error' ? 503 : 200, { status: database === 'error' ? 'degraded' : 'ok', database, dataSource,
+    return json(res, database === 'error' ? 503 : 200, { status: database === 'error' ? 'degraded' : 'ok', database, schema, seeded, dataSource,
       forecasts: database === 'connected' ? (process.env.ML_SERVICE_URL ? 'ml-service (baseline fallback)' : 'baseline') : (ml ? 'ml-service' : 'synthetic-demo') });
   }
   if (useReal()) return backend.handle(req, res);

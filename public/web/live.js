@@ -11,13 +11,21 @@
   var live = false, demoDb = false, C = null, me = null, windows = [], synced = 0, scanning = null;
   var cap = function (s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; };
 
+  // Server errors are {error: "text"}; proxies/platforms may send {error: {message}} or non-JSON. Always return readable text.
+  function errMsg(b, r) {
+    var e = b && b.error;
+    if (typeof e === 'string' && e) return e;
+    if (e && typeof e.message === 'string' && e.message) return e.message;
+    if (b && typeof b.message === 'string' && b.message) return b.message;
+    return 'Request failed (HTTP ' + r.status + '). Please try again, or check the server logs.';
+  }
   function api(path, o) {
     o = o || {};
     var init = { method: o.method || 'GET', credentials: 'same-origin', headers: { Accept: 'application/json' } };
     if (o.body) { init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(o.body); }
     return fetch(path, init).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (b) {
-        if (!r.ok) { var e = new Error(b.error || 'Request failed (' + r.status + ')'); e.status = r.status; throw e; }
+        if (!r.ok) { var e = new Error(errMsg(b, r)); e.status = r.status; throw e; }
         return b;
       });
     });
@@ -221,7 +229,10 @@
       live = true; demoDb = h.dataSource === 'synthetic_demo'; guardStorage();
       C.setDemo(function () { return ''; });                       // no "Demo:" notices for data that is now real
       window.doLogin = doLogin; window.logout = logout;
-      var hint = document.querySelector('#login p.mut.mt'); if (hint) hint.textContent = h.dataSource === 'synthetic_demo' ? 'Demo database: all data is SYNTHETIC. Ask the team for the demo password.' : 'Sign in with your college ID and password.';
+      var hint = document.querySelector('#login p.mut.mt');
+      if (hint) hint.textContent = h.schema === 'missing' ? 'Database connected but not set up yet. Run: npm run db:migrate, then npm run db:seed.'
+        : h.seeded === false ? 'Database has no users yet. Run: npm run db:seed (demo data) or add real users.'
+        : h.dataSource === 'synthetic_demo' ? 'Demo database: all data is SYNTHETIC. Ask the team for the demo password.' : 'Sign in with your college ID and password.';
       var NAV = C.NAV.chief;
       if (!NAV.some(function (n) { return n[0] === 'prep'; })) NAV.splice(1, 0, ['prep', 'Prepared & Actuals'], ['qr', 'Counter QR']);
       C.P.student.scan = scanPage; C.A.scan = scanSetup;

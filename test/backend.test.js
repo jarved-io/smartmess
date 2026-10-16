@@ -260,3 +260,12 @@ test('settings: admin can change a business rule; invalid values rejected', asyn
   assert.equal((await call('PUT', '/api/settings', { key: 'safety_buffer', value: '0.05' }, admin)).status, 200);
   await call('PUT', '/api/settings', { key: 'safety_buffer', value: '0.02' }, admin);
 });
+
+test('an unmigrated database gives a clear 503 instead of a vague error', async () => {
+  const { createPglite: mk } = require('../lib/db');
+  const empty = await mk(); const prev = db; setDb(empty);
+  try {
+    const r = await call('POST', '/api/auth/login', { student_id: 'NN25CSE290', password: PW });
+    assert.equal(r.status, 503); assert.match(r.body.error, /db:migrate/); assert.equal(typeof r.body.error, 'string');
+  } finally { setDb(prev); await empty.close(); }
+});
