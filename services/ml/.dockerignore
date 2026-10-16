@@ -1,0 +1,8 @@
+models/
+reports/
+data/raw/
+data/demo/
+.env
+__pycache__/
+.pytest_cache/
+tests/

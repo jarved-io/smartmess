@@ -1,0 +1,72 @@
+{
+  "rows_raw": 2190,
+  "columns_raw": 8,
+  "columns": [
+    "date",
+    "mess_id",
+    "meal_type",
+    "active_students",
+    "approved_leave",
+    "is_holiday",
+    "is_event",
+    "served_meals"
+  ],
+  "missing_values_raw": {
+    "date": 0,
+    "mess_id": 0,
+    "meal_type": 0,
+    "active_students": 0,
+    "approved_leave": 0,
+    "is_holiday": 0,
+    "is_event": 0,
+    "served_meals": 0
+  },
+  "exact_duplicate_rows_dropped": 0,
+  "invalid_dates_dropped": 0,
+  "missing_mess_or_meal_dropped": 0,
+  "non_numeric_values_coerced_to_nan": 0,
+  "missing_or_negative_target_dropped": 0,
+  "conflicting_key_rows_resolved_keep_last": 0,
+  "rows_clean": 2190,
+  "rows_removed_total": 0,
+  "date_min": "2025-07-01",
+  "date_max": "2026-06-30",
+  "n_messes": 2,
+  "n_meal_types": 3,
+  "messes": [
+    "north",
+    "south"
+  ],
+  "meal_types": [
+    "breakfast",
+    "dinner",
+    "lunch"
+  ],
+  "missing_calendar_days_per_group": {
+    "north/breakfast": 0,
+    "north/dinner": 0,
+    "north/lunch": 0,
+    "south/breakfast": 0,
+    "south/dinner": 0,
+    "south/lunch": 0
+  },
+  "outliers_flagged_not_removed": 58,
+  "zero_target_rows": 0,
+  "target_distribution": {
+    "count": 2190.0,
+    "mean": 574.6077625570776,
+    "std": 104.64188548266452,
+    "min": 245.0,
+    "25%": 509.0,
+    "50%": 568.5,
+    "75%": 675.0,
+    "max": 799.0
+  },
+  "optional_columns_present": [
+    "active_students",
+    "approved_leave",
+    "is_holiday",
+    "is_event"
+  ],
+  "optional_columns_missing": []
+}
