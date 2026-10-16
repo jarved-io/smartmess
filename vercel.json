@@ -4,12 +4,34 @@
   "installCommand": "npm install --omit=dev",
   "buildCommand": null,
   "outputDirectory": "public",
-  "functions": { "api/[...path].js": { "maxDuration": 30 } },
+  "functions": {
+    "api/[...path].js": {
+      "maxDuration": 30
+    }
+  },
   "headers": [
-    { "source": "/(.*)", "headers": [
-      { "key": "X-Content-Type-Options", "value": "nosniff" },
-      { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-      { "key": "X-Frame-Options", "value": "DENY" }
-    ] }
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path+",
+      "destination": "/api/gateway"
+    }
   ]
 }
