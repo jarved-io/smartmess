@@ -1,5 +1,6 @@
 // Local dev server, no dependencies:  node server.js  ->  http://localhost:3000
 // Serves public/ and runs the same /api handler that Vercel runs (api/[...path].js).
+require('dotenv').config();
 const http = require('http'), fs = require('fs'), path = require('path');
 const PORT = process.env.PORT || 3000;
 const PUBLIC = path.join(__dirname, 'public');

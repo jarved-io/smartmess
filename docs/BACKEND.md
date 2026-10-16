@@ -7,11 +7,17 @@ The static app is served from the same origin, so there is no CORS surface and t
 ## Run it
 ```bash
 LOCAL_DB=pglite npm start                 # real backend on an in-process Postgres (no install). Seeds SYNTHETIC data. password: demo1234
-DATABASE_URL=... SESSION_SECRET=... npm start   # against any Postgres (POSTGRES_URL / PRISMA_DATABASE_URL are also accepted)
+# Copy .env.example to .env and set DATABASE_URL for local PostgreSQL
+npm start                                 # run against the configured Postgres
 DATABASE_URL=... npm run db:migrate && SEED_PASSWORD=... npm run db:seed   # create tables, load SYNTHETIC demo data
 npm test                                   # unit + backend (PGlite) + browser-flow (jsdom) tests
 TEST_DATABASE_URL=postgresql://... node --test test/backend.test.js   # same backend tests on a real server
 ```
+`node server.js` loads the root `.env` for local development. Environment variables set by the shell or hosting provider
+take precedence over values from `.env`.
+For a hosted production deployment, configure `DATABASE_URL` and a unique `SESSION_SECRET` in the host's environment
+settings. If the database is empty, run migrations and seed users before login; hosted seeded users use the password
+provided as `SEED_PASSWORD`, not the local demo password.
 
 ## Authentication and roles
 * `POST /api/auth/login {student_id, password}`: scrypt-hashed passwords, HMAC-signed `HttpOnly; SameSite=Lax; Secure` cookie

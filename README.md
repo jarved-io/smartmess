@@ -36,7 +36,9 @@ ML_SERVICE_URL=http://localhost:8000 ML_API_KEY=dev npm start     # real XGBoost
 node scripts/check.js && npm test        # web + backend + browser-flow tests
 cd services/ml && python -m pytest -q    # ML tests
 ```
-For PostgreSQL commands, copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL connection URI.
-The database scripts load `.env` automatically; an environment-provided `DATABASE_URL` takes precedence. For Supabase,
+For local PostgreSQL use, copy `.env.example` to `.env` and set `DATABASE_URL` to your PostgreSQL connection URI.
+Both `node server.js` and the database scripts load `.env` automatically; environment-provided values take precedence.
+For a hosted deployment, set `DATABASE_URL` and a unique `SESSION_SECRET` in the host's environment settings, then redeploy.
+For Supabase,
 use its pooled URI (`postgresql://postgres.<project-ref>:<password>@<pooler-host>:6543/postgres?sslmode=require`).
 Deploy: `docs/DEPLOY.md` (Supabase, Render, Vercel). Backend reference: `docs/BACKEND.md`. Environment variables: `.env.example`.
