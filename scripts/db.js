@@ -5,6 +5,13 @@
  *  reset-seed  wipe everything, then seed (demo databases only!) */
 'use strict';
 const crypto = require('node:crypto');
+const dotenv = require('dotenv');
+const path = require('node:path');
+const envFile = dotenv.config({ path: path.join(__dirname, '..', '.env') });
+if (envFile.error && envFile.error.code !== 'ENOENT') {
+  console.error('Could not load the project .env file.');
+  process.exit(1);
+}
 const { getDb } = require('../lib/db');
 const { migrate, reset, seed } = require('../lib/seed');
 

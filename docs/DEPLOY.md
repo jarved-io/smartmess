@@ -16,6 +16,10 @@ Three pieces: **Supabase** (Postgres), **ML service** (Render), **web app + API*
 3. (Recommended) create a read-only role for the ML service:
    `create role ml_reader login password '...'; grant select on mess_usage, users, leave_requests to ml_reader;`
 
+For local commands, copy `.env.example` to `.env` and set `DATABASE_URL` to the pooled URI shown above. The
+`db:migrate` and `db:seed` scripts load the repository-root `.env` automatically; an existing environment variable
+takes precedence. The URI has the form `postgresql://postgres.<project-ref>:<password>@<pooler-host>:6543/postgres?sslmode=require`.
+
 ## 2. ML service (Render)
 1. Render -> **New -> Blueprint** -> select the repo (reads `render.yaml`).
 2. Set `DATABASE_URL` to the read-only (or the same) connection string. Leave `HISTORY_SOURCE=postgres`, `DATA_LABEL=synthetic`.

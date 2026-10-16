@@ -4,7 +4,10 @@
   "installCommand": "npm install --omit=dev",
   "buildCommand": null,
   "outputDirectory": "public",
-  "functions": { "api/[...path].js": { "maxDuration": 30 } },
+  "functions": {
+    "api/[...path].js": { "maxDuration": 30 },
+    "api/[group]/[action].js": { "maxDuration": 30 }
+  },
   "headers": [
     { "source": "/(.*)", "headers": [
       { "key": "X-Content-Type-Options", "value": "nosniff" },

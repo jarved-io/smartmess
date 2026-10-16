@@ -28,6 +28,7 @@
   },
   "description": "Smart Mess: hostel meal tracking dashboard with XGBoost meal-demand forecasting",
   "dependencies": {
+    "dotenv": "^18.0.8",
     "pg": "^8.23.1"
   }
 }
