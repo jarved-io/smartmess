@@ -17,7 +17,7 @@ const { migrate, reset, seed } = require('../lib/seed');
 
 (async () => {
   const cmd = process.argv[2], db = await getDb();
-  if (!db) { console.error('Set DATABASE_URL (Supabase: use the pooled connection string).'); process.exit(1); }
+  if (!db) { console.error('Set DATABASE_URL, POSTGRES_URL, or PRISMA_DATABASE_URL.'); process.exit(1); }
   await migrate(db);
   if (cmd === 'migrate') { console.log('Schema is up to date.'); }
   else if (cmd === 'seed' || cmd === 'reset-seed') {

@@ -37,13 +37,17 @@ static 404s. Environment variables:
 
 | Variable | Value |
 |---|---|
-| `DATABASE_URL` | Supabase pooler URI (**required**; without it the site runs the synthetic demo backend) |
+| `DATABASE_URL` | PostgreSQL connection URI (**required**; without it the site runs the synthetic demo backend). `POSTGRES_URL` and `PRISMA_DATABASE_URL` are also accepted if `DATABASE_URL` is not set. |
 | `SESSION_SECRET` | 32+ random characters: `openssl rand -hex 32` (**required**) |
 | `ML_SERVICE_URL`, `ML_API_KEY` | Render URL (no trailing slash) and its key |
 | `QR_SECRET` | optional, defaults to `SESSION_SECRET`; change it to invalidate printed QR codes |
 | `WARDEN_WEBHOOK_SECRET` | optional; enables `POST /api/warden/webhook` |
 
 Deploy, then check `https://<app>.vercel.app/api/health`: expect `"database":"connected"` and `"forecasts":"ml-service (baseline fallback)"`.
+If more than one database URL variable is set, `DATABASE_URL` takes precedence, then `POSTGRES_URL`, then
+`PRISMA_DATABASE_URL`. Update or remove any stale higher-priority variable when changing database providers.
+Run `npm run db:migrate` and seed an empty database before expecting demo logins to work; use the password chosen
+with `SEED_PASSWORD` when seeding (the local `demo1234` password does not automatically apply to hosted databases).
 
 ## 4. Smoke test (2 minutes)
 1. Sign in as **Mess Chief** (`CHIEF`, your seed password) -> *Counter QR* shows the code; *Dashboard* shows expected/served; *Prepared & Actuals* saves.

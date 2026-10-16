@@ -7,7 +7,7 @@ The static app is served from the same origin, so there is no CORS surface and t
 ## Run it
 ```bash
 LOCAL_DB=pglite npm start                 # real backend on an in-process Postgres (no install). Seeds SYNTHETIC data. password: demo1234
-DATABASE_URL=... SESSION_SECRET=... npm start   # against any Postgres
+DATABASE_URL=... SESSION_SECRET=... npm start   # against any Postgres (POSTGRES_URL / PRISMA_DATABASE_URL are also accepted)
 DATABASE_URL=... npm run db:migrate && SEED_PASSWORD=... npm run db:seed   # create tables, load SYNTHETIC demo data
 npm test                                   # unit + backend (PGlite) + browser-flow (jsdom) tests
 TEST_DATABASE_URL=postgresql://... node --test test/backend.test.js   # same backend tests on a real server
