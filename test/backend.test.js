@@ -61,15 +61,20 @@ test('POST needs application/json; unknown routes 404; wrong method 405', async 
   assert.equal((await call('GET', '/api/auth/login')).status, 405);
 });
 
-test('nested API routes have explicit Vercel function entrypoints', () => {
+test('API routes use one Vercel catch-all function', () => {
   const handler = require('../api/[...path].js');
-  Object.keys(ROUTES).forEach(key => {
-    const segments = key.split(' ')[1].replace(/^\/api\//, '').split('/');
-    if (segments.length < 2) return;
-    const endpoint = path.join(__dirname, '..', 'api', ...segments) + '.js';
-    assert.ok(fs.existsSync(endpoint), `Missing Vercel function for ${key}`);
-    assert.equal(require(endpoint), handler, `Incorrect Vercel function target for ${key}`);
-  });
+  const apiDir = path.join(__dirname, '..', 'api');
+  const functions = [];
+  function collectFunctions(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const entryPath = path.join(directory, entry.name);
+      if (entry.isDirectory()) collectFunctions(entryPath);
+      else if (entry.isFile() && entry.name.endsWith('.js')) functions.push(path.relative(apiDir, entryPath));
+    }
+  }
+  collectFunctions(apiDir);
+  assert.deepEqual(functions, ['[...path].js']);
+  assert.equal(typeof handler, 'function');
 });
 
 test('RBAC: anonymous 401, student 403 on manager data, manager ok, student-only scan', async () => {

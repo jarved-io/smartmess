@@ -29,7 +29,9 @@ takes precedence. The URI has the form `postgresql://postgres.<project-ref>:<pas
    If the ML service is asleep or down the dashboard still works: forecasts fall back to the 7-day average with a visible warning.
 
 ## 3. Web app + API (Vercel)
-Import the repo (Framework = Other, root directory = repo root). Environment variables:
+Import the repo (Framework = Other, root directory = repo root). Keep API routes in the single
+`api/[...path].js` catch-all: Vercel treats each file under the root `api/` directory as a separate
+Serverless Function, and the Hobby plan allows at most 12 per deployment. Environment variables:
 
 | Variable | Value |
 |---|---|
