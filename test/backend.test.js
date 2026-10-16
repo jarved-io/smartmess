@@ -2,11 +2,12 @@
 process.env.SESSION_SECRET = 'test-secret-test-secret-test-secret';
 delete process.env.ML_SERVICE_URL; delete process.env.ML_API_KEY; delete process.env.WARDEN_WEBHOOK_SECRET;
 const test = require('node:test'), assert = require('node:assert/strict'), http = require('node:http');
+const fs = require('node:fs'), path = require('node:path');
 const { createPglite, setDb, getDb } = require('../lib/db');
 const { migrate, seed, reset } = require('../lib/seed');
 const { handle } = require('../lib/backend');
-const nestedApi = require('../api/[group]/[action]');
 const { qrPayload } = require('../lib/auth');
+const { ROUTES } = require('../lib/routes');
 const { zonedToUtc } = require('../lib/time');
 
 const PW = 'test-password-1';
@@ -60,16 +61,15 @@ test('POST needs application/json; unknown routes 404; wrong method 405', async 
   assert.equal((await call('GET', '/api/auth/login')).status, 405);
 });
 
-test('nested Vercel API entry dispatches auth routes to the backend', async () => {
-  const res = { setHeader() {}, end(body) { this.body = body; } };
-  await nestedApi({
-    method: 'POST',
-    url: '/api/auth/login',
-    headers: { 'content-type': 'application/json' },
-    body: { student_id: 'NN25CSE290', password: 'incorrect-password' }
-  }, res);
-  assert.equal(res.statusCode, 401);
-  assert.equal(JSON.parse(res.body).error, 'Wrong ID or password');
+test('nested API routes have explicit Vercel function entrypoints', () => {
+  const handler = require('../api/[...path].js');
+  Object.keys(ROUTES).forEach(key => {
+    const segments = key.split(' ')[1].replace(/^\/api\//, '').split('/');
+    if (segments.length < 2) return;
+    const endpoint = path.join(__dirname, '..', 'api', ...segments) + '.js';
+    assert.ok(fs.existsSync(endpoint), `Missing Vercel function for ${key}`);
+    assert.equal(require(endpoint), handler, `Incorrect Vercel function target for ${key}`);
+  });
 });
 
 test('RBAC: anonymous 401, student 403 on manager data, manager ok, student-only scan', async () => {
