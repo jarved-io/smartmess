@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+require('dotenv').config();
 /* Usage:  DATABASE_URL=... node scripts/db.js migrate | seed [--students 200] | reset-seed
  *  migrate     create/upgrade tables (idempotent)
  *  seed        load SYNTHETIC demo data into an EMPTY database; prints the demo login password once
