@@ -1,32 +1,39 @@
-# Next.js + Prisma + Postgres (Vercel-ready)
+# Smart Mess
 
-## 1. Database
-Create a free Postgres database (Neon, Supabase, or Vercel Postgres) and copy its connection string.
+Hostel mess meal tracking + **aggregate meal-demand forecasting** (XGBoost). Students scan a QR with their own phone;
+mess staff only check green/red; the manager dashboard shows live counts, tomorrow's forecast, predicted vs actual and reports.
 
-## 2. Run locally
-```bash
-npm install
-cp .env.example .env        # then fill in DATABASE_URL and ADMIN_KEY
-npx prisma db push          # creates the Contact table
-npm run dev
+```
+public/            web app (student portal + manager dashboard), static; web/live.js connects it to the backend
+api/[...path].js   Vercel serverless entry: real backend when DATABASE_URL is set, synthetic demo backend otherwise
+lib/               backend: auth, scan validation, routes, forecasts, Warden adapter, seed (see docs/BACKEND.md)
+db/schema.sql      PostgreSQL schema (PRD tables)        scripts/db.js   migrate / seed
+mock/, adapters/   synthetic demo backend (no-database fallback) and ML adapter
+services/ml/       Python FastAPI + XGBoost forecasting service (own README); trains from the database
+docs/              BACKEND, API contract, DEPLOY, demo script/status
+test/              unit, backend (PGlite or real Postgres), browser-flow (jsdom) tests; Playwright E2E run locally
 ```
 
-## 3. Push to GitHub
+## What is real and what is demo (read before presenting)
+| Part | Status |
+|---|---|
+| Student/staff login, role checks, QR scan with server-side validation, meal ledger, leave rules, prepared/actual recording, dashboards, reports, forecast storage and evaluation | **Real code on PostgreSQL**, tested (including against a real Postgres server) |
+| XGBoost pipeline (baseline comparison, chronological validation, versioned models) | Real code; trains from the `mess_usage` table |
+| **Data in the deployed demo** | **SYNTHETIC** (seeded; flagged on screen). Forecast accuracy numbers say nothing about real accuracy until real meal history exists |
+| Warden integration | Adapter + webhook; the Warden app itself is not built here |
+| Menu, inventory, feedback pages | Browser-only demo (not in the PRD data model) |
+| Pricing/ledger charges, offline local server, rotating QR | Not built (open decisions in the PRD) |
+
+Without `DATABASE_URL` the site falls back to a fully synthetic demo backend, so it never shows a broken page.
+
+## Run locally
 ```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/<you>/<repo>.git
-git push -u origin main
+LOCAL_DB=pglite npm start                # real backend on an in-process Postgres, SYNTHETIC data; logins CHIEF / NN25CSE290, password demo1234
+npm start                                # no database: synthetic demo backend
+cd services/ml && pip install -r requirements-dev.txt
+ML_API_KEY=dev sh scripts/start.sh       # ML service on :8000 (demo mode, synthetic data)
+ML_SERVICE_URL=http://localhost:8000 ML_API_KEY=dev npm start     # real XGBoost forecasts in the dashboard
+node scripts/check.js && npm test        # web + backend + browser-flow tests
+cd services/ml && python -m pytest -q    # ML tests
 ```
-
-## 4. Deploy on Vercel
-1. Import the GitHub repo on vercel.com (framework: Next.js, auto-detected).
-2. Add environment variables: `DATABASE_URL`, `ADMIN_KEY`.
-3. Deploy. Visit `/api/health` to confirm the database is connected.
-
-## API
-- `POST /api/contact` with `{ name, email, message }` saves a message.
-- `GET /api/contact` with header `x-admin-key: <ADMIN_KEY>` lists messages.
-- `GET /api/health` checks DB connectivity.
+Deploy: `docs/DEPLOY.md` (Supabase, Render, Vercel). Backend reference: `docs/BACKEND.md`. Environment variables: `.env.example`.

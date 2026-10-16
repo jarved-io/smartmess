@@ -1,0 +1,22 @@
+# Render Blueprint for the ML service (https://render.com -> New -> Blueprint).
+services:
+  - type: web
+    name: smart-mess-ml
+    runtime: docker
+    dockerfilePath: ./services/ml/Dockerfile
+    dockerContext: ./services/ml
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: ML_API_KEY
+        generateValue: true        # copy this value into Vercel as ML_API_KEY
+      - key: HISTORY_SOURCE
+        value: postgres            # train + forecast from the Smart Mess database (mess_usage)
+      - key: DATABASE_URL
+        sync: false                # paste a READ-ONLY connection string (see docs/DEPLOY.md)
+      - key: DATA_LABEL
+        value: synthetic           # change to "real" once the database holds real meal data
+      - key: SAFETY_BUFFER
+        value: "0.02"
+      - key: LOG_LEVEL
+        value: INFO
