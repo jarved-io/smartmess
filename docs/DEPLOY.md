@@ -31,7 +31,9 @@ takes precedence. The URI has the form `postgresql://postgres.<project-ref>:<pas
 ## 3. Web app + API (Vercel)
 Import the repo (Framework = Other, root directory = repo root). Keep API routes in the single
 `api/[...path].js` catch-all: Vercel treats each file under the root `api/` directory as a separate
-Serverless Function, and the Hobby plan allows at most 12 per deployment. Environment variables:
+Serverless Function, and the Hobby plan allows at most 12 per deployment. Do not put API files under
+`public/api/`: `public/` is the static output directory, and those files can shadow API routes with
+static 404s. Environment variables:
 
 | Variable | Value |
 |---|---|

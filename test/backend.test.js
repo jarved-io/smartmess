@@ -64,17 +64,21 @@ test('POST needs application/json; unknown routes 404; wrong method 405', async 
 test('API routes use one Vercel catch-all function', () => {
   const handler = require('../api/[...path].js');
   const apiDir = path.join(__dirname, '..', 'api');
-  const functions = [];
   function collectFunctions(directory) {
+    const files = [];
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       const entryPath = path.join(directory, entry.name);
-      if (entry.isDirectory()) collectFunctions(entryPath);
-      else if (entry.isFile() && entry.name.endsWith('.js')) functions.push(path.relative(apiDir, entryPath));
+      if (entry.isDirectory()) files.push(...collectFunctions(entryPath).map(file => path.join(entry.name, file)));
+      else if (entry.isFile() && entry.name.endsWith('.js')) files.push(entry.name);
     }
+    return files;
   }
-  collectFunctions(apiDir);
-  assert.deepEqual(functions, ['[...path].js']);
+  assert.deepEqual(collectFunctions(apiDir), ['[...path].js']);
   assert.equal(typeof handler, 'function');
+  const publicApiDir = path.join(__dirname, '..', 'public', 'api');
+  if (fs.existsSync(publicApiDir)) {
+    assert.deepEqual(collectFunctions(publicApiDir), []);
+  }
 });
 
 test('RBAC: anonymous 401, student 403 on manager data, manager ok, student-only scan', async () => {
